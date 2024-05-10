@@ -1,0 +1,26 @@
+{
+    "name": "stasmarkov/zen-framework",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "ZenFramework\\": "web/src/",
+            "ZenFramework\\Core\\": "src/lib/Core"
+        },
+        "files": [
+            "src/includes/bootstrap.inc"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Stanislav Markov",
+            "email": "stas.markov1995@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/http-foundation": "^6.4",
+        "symfony/routing": "^7.0",
+        "twig/twig": "^3.9",
+        "symfony/http-kernel": "^7.0",
+        "symfony/event-dispatcher": "^7.0"
+    }
+}

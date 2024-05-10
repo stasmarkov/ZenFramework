@@ -1,0 +1,7 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+  <p>Current time {{ time }}</p>
+  <p>Hello {{ name|default('World') }}</p>
+  <p>Your age is: {{ age }}</p>
+{% endblock %}
