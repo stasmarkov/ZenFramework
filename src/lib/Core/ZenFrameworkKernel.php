@@ -6,7 +6,9 @@ declare(strict_types=1);
 namespace ZenFramework\Core;
 
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use ZenFramework\Core\Events\RequestEvent;
 use ZenFramework\Core\Events\ResponseEvent;
 use ZenFramework\Core\Renderer\TwigTemplateRenderer;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,7 +28,7 @@ use ZenFramework\EventSubscribers\GoogleAnalyticsEventSubscriber;
 /**
  * The kernel class.
  */
-class Kernel implements HttpKernelInterface {
+class ZenFrameworkKernel implements HttpKernelInterface {
 
   /**
    * The renderer service.
@@ -84,6 +86,8 @@ class Kernel implements HttpKernelInterface {
     $this->initSubscribers();
     $response = new Response();
 
+    $this->eventDispatcher->dispatch(new RequestEvent($response, $request), 'kernel:request');
+
     $routes = $this->registerRoutes();
     $context = new RequestContext();
     $url_matcher = new CompiledUrlMatcher($routes, $context);
@@ -103,14 +107,39 @@ class Kernel implements HttpKernelInterface {
       ], $request);
     }
     catch (\Exception $exception) {
-      $response->setStatusCode(500);
-      $response->setContent('Internal error.');
+      $response = $this->handleException($exception, $request, $type);
     }
 
     $this->eventDispatcher->dispatch(new ResponseEvent($response, $request), 'kernel:response');
 
     $response->prepare($request);
     return $response;
+  }
+
+  /**
+   * Handle the exception.
+   *
+   * @param \Exception $e
+   *   The exception.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param int $type
+   *   The type of request.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
+   *
+   * @throws \Exception
+   *   Throws expception.
+   */
+  protected function handleException(\Exception $e, Request $request, int $type): Response {
+    if ($e instanceof HttpExceptionInterface) {
+      $response = new Response($e->getMessage(), $e->getCode());
+      $response->headers->add($e->getHeaders());
+      return $response;
+    }
+
+    throw $e;
   }
 
   /**
