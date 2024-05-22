@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-
 namespace ZenFramework\Core;
 
+use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use ZenFramework\Controller\MercurePublisher;
+use ZenFramework\Controller\MercureSubscriber;
 use ZenFramework\Core\Events\RequestEvent;
 use ZenFramework\Core\Events\ResponseEvent;
 use ZenFramework\Core\Renderer\TwigTemplateRenderer;
@@ -67,6 +69,9 @@ class ZenFrameworkKernel implements HttpKernelInterface {
   public function boot() {
     $this->renderer = new TwigTemplateRenderer();
     $this->eventDispatcher = new EventDispatcher();
+    // @todo Boot env variables in another place.
+    $dotenv = new Dotenv();
+    $dotenv->load(ZENFRAMEWORK_ROOT . '/.env');
     return $this;
   }
 
@@ -156,6 +161,12 @@ class ZenFrameworkKernel implements HttpKernelInterface {
     ]));
     $routes->add('404', new Route('/404', [
       '_controller' => [new NotFoundController($this->renderer), 'index'],
+    ]));
+    $routes->add('mercure_publisher', new Route('/mercure-publisher', [
+      '_controller' => [new MercurePublisher($this->renderer), 'index'],
+    ]));
+    $routes->add('mercure_subscriber', new Route('/mercure-subscriber', [
+      '_controller' => [new MercureSubscriber($this->renderer), 'index'],
     ]));
     return (new CompiledUrlMatcherDumper($routes))->getCompiledRoutes();
   }

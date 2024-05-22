@@ -16,7 +16,7 @@ class TwigTemplateRenderer implements TemplateRendererInterface {
    * {@inheritdoc}
    */
   public function render(string $template_name, array $arguments = []): string {
-    $loader = new FilesystemLoader(ZENFRAMEWORK_ROOT . '/web/templates');
+    $loader = new FilesystemLoader(ZENFRAMEWORK_ROOT . '/public/templates');
     return (new Environment($loader))->render($template_name, $arguments);
   }
 

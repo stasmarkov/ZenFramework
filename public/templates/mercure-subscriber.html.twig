@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+
+{% block content %}
+  <h1>The mercure subscriber.</h1>
+  <p>
+    Havigate to the <a href="https://zen-framework.ddev.site/mercure-publisher" target="_blank">this page</a> in another tab.
+  </p>
+  <div id="mercure-error" style="display: none; margin-top: 1rem; padding: 1rem; border: 1px solid red; color: red; background: #fce2e6;"></div>
+  <div id="mercure-receiver" style="display: none; margin-top: 1rem; width: 20%; height: 100px; border: 2px solid black;"></div>
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    try {
+      console.log('Attempt Mercure EventSource');
+
+      const eventSource = new EventSource("https://zen-framework.ddev.site:10002/.well-known/mercure?topic=https://zen-framework.ddev.site/channel/test");
+
+      eventSource.addEventListener("error", (e) => {
+        document.querySelector('#mercure-error').innerText = "An error occurred while attempting to connect.";
+        document.querySelector('#mercure-error').style.display = 'inline-block';
+        document.querySelector('#mercure-receiver').style.display = 'none';
+      });
+
+      eventSource.onmessage = event => {
+        // Will be called every time an update is published by the server.
+        const data = JSON.parse(event.data);
+        console.log(data);
+        document.querySelector('#mercure-receiver').innerText = data.value;
+        document.querySelector('#mercure-error').style.display = 'none';
+        document.querySelector('#mercure-receiver').style.display = 'inline-block';
+      }
+    } catch (e) {
+      document.querySelector('#mercure-error').innerText = "An error occurred while attempting to create EventSource.";
+      document.querySelector('#mercure-error').style.display = 'inline-block';
+      document.querySelector('#mercure-receiver').style.display = 'none';
+    }
+  </script>
+{% endblock %}
